@@ -72,7 +72,8 @@ class Scraper:
         for url in category_urls:
             recipe_urls += self.scrape_ctegory_page(url)
         for url in recipe_urls:
-            self.recipes.append(self.scrape_url(url))
+            recipe_name, recipe_ings = self.scrape_url(url)
+            self.recipes.append([recipe_name, url, recipe_ings])
 
     def scrape_url(self, url):
         """
@@ -85,10 +86,12 @@ class Scraper:
         source = requests.get(url).text
         soup = BeautifulSoup(source, 'html.parser')
         ingredients = soup.findAll("li", {"class": "checkList__line"})
+        recipe_name_tag = soup.findAll("h1", {"id": "recipe-main-content"})
+        recipe_name = recipe_name_tag[0].text
         for item in ingredients:
             if hasattr(item.label, "title"):
                 rec_ingredients.append(item.label["title"])
-        return rec_ingredients
+        return recipe_name, rec_ingredients
 
     def scrape_ctegory_page(self, url):
         """
