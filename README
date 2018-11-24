@@ -1,0 +1,18 @@
+Made by Guy Segal.
+start: 24/11/2018
+
+
+Recipe By Groceries:
+
+This program proposes a recipe by the groceries you have in your house.
+The implementation is as follows:
+1) The program asks the user for the groceries he has in his/her house
+2) The program scrapes the main recipes from "https://www.allrecipes.com/"
+3) Then the program offers the user the most suitable recipe it finds.
+
+Thus, the program will be divided into 3 modules -
+1) Interface with the user - This module will be responsible for getting the information about the
+							 groceries at hand.
+2) A module for scraping the web for the most up-to-date recipes
+3) A module that calculates what are the best recipes available
+
