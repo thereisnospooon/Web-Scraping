@@ -15,7 +15,7 @@ class Scraper:
         self.path = path
         self.recipes = []
 
-    def get_urls(self):
+    def get_categories_urls(self):
         """
         Gets the urls from the main page of "www.allrecipes.com"
         :return:
@@ -67,10 +67,12 @@ class Scraper:
         """
         :return: A list of recipes
         """
-        urls = self.get_urls()
-        for url in urls:
+        recipe_urls = []
+        category_urls = self.get_categories_urls()
+        for url in category_urls:
+            recipe_urls += self.scrape_ctegory_page(url)
+        for url in recipe_urls:
             self.recipes.append(self.scrape_url(url))
-        pass
 
     def scrape_url(self, url):
         """
@@ -78,7 +80,30 @@ class Scraper:
         :param url: url for a recipe
         :return: a dictionary containing the recipe name, url, and ingredients needed.
         """
-        # Todo: write this function
+        rec_ingredients = []
+        print("Now scraping: " + url)
+        source = requests.get(url).text
+        soup = BeautifulSoup(source, 'html.parser')
+        ingredients = soup.findAll("li", {"class": "checkList__line"})
+        for item in ingredients:
+            if hasattr(item.label, "title"):
+                rec_ingredients.append(item.label["title"])
+        return rec_ingredients
+
+    def scrape_ctegory_page(self, url):
+        """
+        Given a url to a category page of recipes, this method extracts the url of specific recipes
+        :param url: url to category web page
+        :return: the url's int this page
+        """
+        urls = []
+        source = requests.get(url).text
+        soup = BeautifulSoup(source, 'html.parser')
+        divs = soup.findAll("div", {"class": "grid-card-image-container"})
+        for div in divs:
+            if hasattr(div.a, "href"):
+                urls.append(div.a["href"])
+        return urls
 
 
 if __name__ == '__main__':

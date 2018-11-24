@@ -16,3 +16,4 @@ Thus, the program will be divided into 3 modules -
 2) A module for scraping the web for the most up-to-date recipes
 3) A module that calculates what are the best recipes available
 
+# Todo: Maybe construct a database that i'll update with each call of the program
