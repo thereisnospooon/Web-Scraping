@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+import pandas
 import requests
 
 
@@ -14,6 +15,7 @@ class Scraper:
         """
         self.path = path
         self.recipes = []
+        self.rec_counter = 0
 
     def get_categories_urls(self):
         """
@@ -72,7 +74,13 @@ class Scraper:
         for url in category_urls:
             recipe_urls += self.scrape_ctegory_page(url)
         for url in recipe_urls:
+            if not self.validate_url(url):
+                continue
             recipe_name, recipe_ings = self.scrape_url(url)
+            self.rec_counter += 1
+            # Todo: Need to delete this when doing full scraping. this is only for the sample
+            if self.rec_counter == 1000:
+                break
             self.recipes.append([recipe_name, url, recipe_ings])
 
     def scrape_url(self, url):
@@ -87,10 +95,16 @@ class Scraper:
         soup = BeautifulSoup(source, 'html.parser')
         ingredients = soup.findAll("li", {"class": "checkList__line"})
         recipe_name_tag = soup.findAll("h1", {"id": "recipe-main-content"})
-        recipe_name = recipe_name_tag[0].text
+        if recipe_name_tag != []:
+            print(recipe_name_tag)
+            print("*************************   " + str(self.rec_counter) + "    ************************")
+            print()
+            recipe_name = recipe_name_tag[0].text
+        else:
+            return None, None
         for item in ingredients:
             if hasattr(item.label, "title"):
-                rec_ingredients.append(item.label["title"])
+                rec_ingredients.append(item.label.get('title'))
         return recipe_name, rec_ingredients
 
     def scrape_ctegory_page(self, url):
@@ -108,7 +122,20 @@ class Scraper:
                 urls.append(div.a["href"])
         return urls
 
+    def write_recipes(self):
+        recs = pandas.DataFrame(self.recipes)
+        pandas.DataFrame.to_csv(recs, path_or_buf="recipes.csv")
+
+    def validate_url(self, url: str):
+        """
+        Given a url, this function validates that it'll lead to a recipe
+        :param url: The url
+        :return:
+        """
+        return url.startswith("https://www.allrecipes.com/recipe")
+
 
 if __name__ == '__main__':
     scraper = Scraper("https://www.allrecipes.com/recipes/?page=2")
     scraper.get_recipes()
+    scraper.write_recipes()
